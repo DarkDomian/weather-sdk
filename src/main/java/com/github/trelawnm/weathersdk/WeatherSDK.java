@@ -2,6 +2,12 @@ package com.github.trelawnm.weathersdk;
 
 import java.time.Duration;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.io.IOException;
+
 /**
  * Weather SDK - lightweight Java library for OpenWeatherMap API.
  * Provides a simple interface to retrieve weather data in JSON format.
@@ -131,6 +137,58 @@ public class WeatherSDK {
             if (sdk.mode == WeatherSDKMode.POLLING && sdk.pollingInterval.isNegative()) {
                 throw new IllegalStateException("Polling interval cannot be negative in POLLING mode");
             }
+        }
+    }
+
+    /**
+     * Gets current weather data for specified city
+     * @param cityName the name of the city
+     * @return weather data in JSON format
+     * @throws WeatherSDKException if request fails or city not found
+     */
+    public String getWeather(String cityName) {
+        // Базовая валидация входных параметров
+        if (cityName == null || cityName.isBlank()) {
+            throw new IllegalArgumentException("City name cannot be null or empty");
+        }
+        
+        try {
+            // Формируем URL для запроса
+            String url = String.format("%s?q=%s&appid=%s", 
+                endpoint, 
+                java.net.URLEncoder.encode(cityName, java.nio.charset.StandardCharsets.UTF_8),
+                key);
+            
+            // Создаем HTTP клиент если еще не создан
+            HttpClient client = HttpClient.newHttpClient();
+            
+            // Создаем запрос
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(10))
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+            
+            // Выполняем запрос
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            // Проверяем статус ответа
+            if (response.statusCode() == 200) {
+                return response.body();
+            } else {
+                // Бросаем стандартное исключение с информацией об ошибке
+                throw new RuntimeException("Weather API request failed. Status: " + 
+                    response.statusCode() + ", Response: " + response.body());
+            }
+            
+        } catch (IOException e) {
+            throw new RuntimeException("Network error while fetching weather data: " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Восстанавливаем флаг прерывания
+            throw new RuntimeException("Request was interrupted", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
         }
     }
 
