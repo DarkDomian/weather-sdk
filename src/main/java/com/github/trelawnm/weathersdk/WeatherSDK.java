@@ -2,6 +2,9 @@ package com.github.trelawnm.weathersdk;
 
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.trelawnm.weathersdk.model.WeatherResponse;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -32,6 +35,8 @@ public class WeatherSDK {
     private final String endpoint;
     private final WeatherSDKMode mode;
     private final Duration pollingInterval;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Returns the API key used for authentication with OpenWeatherMap service
@@ -175,7 +180,8 @@ public class WeatherSDK {
             
             // Проверяем статус ответа
             if (response.statusCode() == 200) {
-                return response.body();
+                    WeatherResponse weatherResponse = objectMapper.readValue(response.body(), WeatherResponse.class);
+                     return objectMapper.writeValueAsString(weatherResponse);
             } else {
                 // Бросаем стандартное исключение с информацией об ошибке
                 throw new RuntimeException("Weather API request failed. Status: " + 
