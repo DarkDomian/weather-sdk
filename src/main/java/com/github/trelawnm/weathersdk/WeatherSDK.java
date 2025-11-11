@@ -181,7 +181,7 @@ public class WeatherSDK {
             // Проверяем статус ответа
             if (response.statusCode() == 200) {
                     WeatherResponse weatherResponse = objectMapper.readValue(response.body(), WeatherResponse.class);
-                     return objectMapper.writeValueAsString(weatherResponse);
+                    return objectMapper.writeValueAsString(weatherResponse);
             } else {
                 // Бросаем стандартное исключение с информацией об ошибке
                 throw new RuntimeException("Weather API request failed. Status: " + 
