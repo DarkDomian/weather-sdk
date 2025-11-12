@@ -25,7 +25,14 @@ import java.util.concurrent.TimeUnit;
  * Weather SDK - lightweight Java library for OpenWeatherMap API.
  * Provides a simple interface to retrieve weather data in JSON format.
  * 
- * <p><b>Usage Example:</b>
+ * <p><b>Operation Modes:</b>
+ * <ul>
+ *   <li><b>ON_DEMAND</b> - Lazy polling: data is fetched on request with TTL-based caching</li>
+ *   <li><b>POLLING</b> - True polling: background agent periodically updates all cached cities</li>
+ * </ul>
+ * </p>
+ * 
+ * <p><b>Usage Example (ON_DEMAND mode):</b>
  * <pre>
  * {@code
  * WeatherSDK sdk = new WeatherSDK.Builder("your-api-key")
@@ -34,8 +41,38 @@ import java.util.concurrent.TimeUnit;
  *     .build();
  * String weatherJson = sdk.getWeather("London");
  * System.out.println(weatherJson);
+ * 
+ * // Don't forget to cleanup when done
+ * sdk.shutdown();
  * }
  * </pre>
+ * </p>
+ * 
+ * <p><b>Usage Example (POLLING mode):</b>
+ * <pre>
+ * {@code
+ * // SDK automatically starts background polling agent
+ * WeatherSDK sdk = new WeatherSDK.Builder("your-api-key")
+ *     .mode(WeatherSDKMode.POLLING)
+ *     .pollingInterval(Duration.ofMinutes(10))
+ *     .maxSize(15)
+ *     .build();
+ * 
+ * // Immediate response from cache (zero latency)
+ * String weatherJson = sdk.getWeather("London");
+ * System.out.println(weatherJson);
+ * 
+ * // Don't forget to cleanup when done
+ * sdk.shutdown();
+ * }
+ * </pre>
+ * </p>
+ * 
+ * <p><b>Resource Management:</b>
+ * For POLLING mode, always call {@link #shutdown()} to stop background threads
+ * and release resources when the SDK is no longer needed.
+ * </p>
+ * 
  * @author trelawnm
  * @version 1.0
  * @see <a href="https://openweathermap.org/api">OpenWeatherMap API</a>
@@ -47,11 +84,20 @@ public class WeatherSDK {
     private final Duration pollingInterval;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * Cache manager for weather data with LRU eviction and TTL support.
+     * Shared across both operation modes with different usage patterns.
+     */
     private final WeatherCache cache;
     private final HttpClient client = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))
         .build();
 
+    /**
+     * Scheduled executor service for background polling in POLLING mode.
+     * Null in ON_DEMAND mode to conserve resources.
+     */
     private final ScheduledExecutorService scheduler;
 
     /**
@@ -79,13 +125,15 @@ public class WeatherSDK {
     public Duration getPollingInterval() { return pollingInterval; }
 
     /**
-     * Builder class for creating configured instances of WeatherSDK.
-     * Implements the Builder pattern for flexible object creation.
+     * Builder for configuring WeatherSDK instances with fluent interface.
+     * Ensures required parameters are provided and applies sensible defaults.
      */
     public static class Builder {
-        // required
         private String key;
-        // unrequired
+        /**
+         * Maximum number of cities to cache simultaneously.
+         * When limit is reached, least recently used cities are evicted.
+         */
         private Integer maxSize = 10;
         private String endpoint = "https://api.openweathermap.org/data/2.5/weather";
         private WeatherSDKMode mode = WeatherSDKMode.ON_DEMAND;
@@ -95,7 +143,7 @@ public class WeatherSDK {
 
         /**
          * Constructs a new Builder with the required API key
-         *  @param key the OpenWeatherMap API key (required)
+         * @param key the OpenWeatherMap API key (required)
          * @throws IllegalArgumentException if the API key is null or blank
          */
         public Builder(String key) {
@@ -135,6 +183,11 @@ public class WeatherSDK {
             return this;
         }
 
+        /**
+         * Sets the maximum size for stored data
+         * @param maxSize the number of DTO instanse remember too (default: 10)
+         * @return the current Builder instance for method chaining
+         */
         public Builder maxSize(Integer size) {
             this.maxSize = size;
             return this;
@@ -218,6 +271,16 @@ public class WeatherSDK {
         }
     }
 
+    /**
+     * Gets current weather data for specified city in JSON format.
+     * Implements different caching strategies based on operation mode:
+     * - ON_DEMAND: Lazy polling with TTL-based cache validation
+     * - POLLING: Immediate response from pre-refreshed cache
+     * 
+     * @param cityName the name of the city to query
+     * @return weather data as JSON string
+     * @throws RuntimeException if city not found or API request fails
+     */
     public String getWeather(String cityName) {
         WeatherResponse cached = cache.get(cityName);
         if (cached == null) {
@@ -241,8 +304,6 @@ public class WeatherSDK {
             throw new RuntimeException("Failed to serialize object to JSON", e);
         }
     }
-
-    /* POLLING METHODS */
     
     /**
      * Starts background polling agent for POLLING mode
@@ -266,7 +327,9 @@ public class WeatherSDK {
     }
     
     /**
-     * Cleanup resources when SDK is no longer needed
+     * Gracefully shuts down background polling agent (if enabled) and releases resources.
+     * Should be called when SDK is no longer needed, especially in POLLING mode.
+     * No-op if scheduler is not initialized (ON_DEMAND mode).
      */
     public void shutdown() {
         if (scheduler != null) {
@@ -275,8 +338,18 @@ public class WeatherSDK {
     }
 
     /**
-     * Constructs a new WeatherSDK instance from the Builder
-     * @param builder the Builder containing configuration parameters
+     * Clears all cached weather data.
+     * Useful for freeing memory or resetting SDK state.
+     */
+    public void clearCache() {
+        cache.clear();
+    }
+
+    /**
+     * Constructs a new WeatherSDK instance with configuration from Builder.
+     * Automatically starts polling agent if POLLING mode is enabled.
+     * 
+     * @param builder the Builder instance containing all configuration parameters
      */
     WeatherSDK(Builder builder) {
         this.key = builder.key;
