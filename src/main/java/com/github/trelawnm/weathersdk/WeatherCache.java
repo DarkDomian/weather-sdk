@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * Thread-safe LRU (Least Recently Used) cache for weather data with TTL support.
@@ -50,6 +53,20 @@ public class WeatherCache {
     private final Deque<String> accessOrder;
     
     /**
+     * Internal DTO for cached weather data with timestamp.
+     */
+    private record CachedWeatherData(
+        WeatherResponse weatherData,
+        Long timestamp
+    ){
+        public CachedWeatherData {
+            if (weatherData == null) {
+                throw new IllegalArgumentException("Weather data cannot be null");
+            }
+        }
+    }
+
+    /**
      * Constructs a new weather cache with specified capacity and TTL.
      *
      * @param maxSize the maximum number of cities to cache (must be positive)
@@ -92,7 +109,7 @@ public class WeatherCache {
         }
         
         updateAccessOrder(city);
-        return cached.getWeather();
+        return cached.weatherData();
     }
     
     /**
@@ -111,7 +128,6 @@ public class WeatherCache {
         evictIfNeeded();
 
         CachedWeatherData newData = new CachedWeatherData(
-            city, 
             weatherData, 
             System.currentTimeMillis()
         );
@@ -128,7 +144,7 @@ public class WeatherCache {
      */
     private boolean isStale(CachedWeatherData data) {
         long currentTime = System.currentTimeMillis();
-        long dataAge = currentTime - data.getTimestamp();
+        long dataAge = currentTime - data.timestamp();
         return dataAge > ttl.toMillis();
     }
     
@@ -161,6 +177,14 @@ public class WeatherCache {
      */
     public int size() {
         return cache.size();
+    }
+
+    /**
+     * Returns all cities currently in cache
+     * @return set of city names
+     */
+    public Set<String> getAllCities() {
+        return new HashSet<>(cache.keySet());
     }
     
     /**
