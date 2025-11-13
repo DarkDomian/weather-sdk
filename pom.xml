@@ -39,13 +39,6 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Local environment support -->
-    <dependency>
-      <groupId>io.github.cdimascio</groupId>
-      <artifactId>dotenv-java</artifactId>
-      <version>3.2.0</version>
-      <scope>test</scope>
-    </dependency>
     <!-- JSON parser -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

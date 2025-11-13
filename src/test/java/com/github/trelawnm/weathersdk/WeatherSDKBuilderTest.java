@@ -1,7 +1,6 @@
 package com.github.trelawnm.weathersdk;
 
 import org.junit.jupiter.api.Test;
-import io.github.cdimascio.dotenv.Dotenv;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
@@ -10,7 +9,7 @@ import java.time.Duration;
  * Tests for WeatherSDK Builder and configuration
  */
 class WeatherSDKBuilderTest {
-    private static final String VALID_API_KEY = Dotenv.load().get("OPENWEATHER_API_KEY");
+    private static final String VALID_API_KEY = System.getenv("OPENWEATHER_API_KEY");
     
     @Test
     void builder_WithValidParameters_ShouldCreateInstance() {

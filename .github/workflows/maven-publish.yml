@@ -24,14 +24,11 @@ jobs:
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-        
-    - name: Create .env file
-      run: |
-        echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > .env
-        echo "Created .env file with API key"
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      env:
+        OPENWEATHER_API_KEY: ${{ sicrets.OPENWEATHER_API_KEY }}
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml

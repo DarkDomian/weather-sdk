@@ -24,4 +24,3 @@ logs/
 
 # Inner files
 internal/
-.env

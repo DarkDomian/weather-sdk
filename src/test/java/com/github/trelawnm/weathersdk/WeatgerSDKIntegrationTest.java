@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 /**
  * Integration tests for WeatherSDK
  * These tests make actual API calls to OpenWeatherMap
@@ -18,8 +16,7 @@ class WeatherSDKIntegrationTest {
 
     @BeforeAll
     public static void setUp() {
-        Dotenv dotenv = Dotenv.load();
-        apiKey = dotenv.get("OPENWEATHER_API_KEY");
+        apiKey = System.getenv("OPENWEATHER_API_KEY");
         
         if (apiKey == null) {
             throw new IllegalStateException("OPENWEATHER_API_KEY not found in .env file");
