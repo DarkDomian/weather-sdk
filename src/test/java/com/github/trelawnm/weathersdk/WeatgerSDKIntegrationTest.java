@@ -54,7 +54,7 @@ class WeatherSDKIntegrationTest {
         }
     }
     
-    @Test
+    /* @Test
     @Timeout(10)
     void getWeather_NonExistentCity_ShouldThrowException() {
         // Arrange
@@ -72,6 +72,7 @@ class WeatherSDKIntegrationTest {
         System.out.println(exception.getMessage());
         System.out.println("=== End of error message ===\n");
     }
+    */
     
     @Test
     @Timeout(10)

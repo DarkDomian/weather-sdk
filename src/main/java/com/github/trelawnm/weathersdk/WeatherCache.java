@@ -78,7 +78,7 @@ public class WeatherCache {
             throw new IllegalArgumentException("Max size of cache can't be less then 1");
         }
 
-        if (!ttl.isPositive()) {
+        if (ttl == null || ttl.isNegative()) {
             throw new IllegalArgumentException("Time to live variable can't be negative or null");
         }
 
