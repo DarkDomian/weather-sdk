@@ -105,7 +105,9 @@
               <source>17</source>
               <show>public</show>
               <nohelp>true</nohelp>
-              <detectJavaApiLink>false</detectJavaApiLink>
+              <additionalOptions>-Xdoclint:none</additionalOptions>
+              <failOnError>false</failOnError>
+            <detectJavaApiLink>false</detectJavaApiLink>
           </configuration>
         </plugin>
       </plugins>

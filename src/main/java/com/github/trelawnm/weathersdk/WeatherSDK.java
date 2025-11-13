@@ -30,8 +30,6 @@ import java.util.concurrent.TimeUnit;
  *   <li><b>ON_DEMAND</b> - Lazy polling: data is fetched on request with TTL-based caching</li>
  *   <li><b>POLLING</b> - True polling: background agent periodically updates all cached cities</li>
  * </ul>
- * </p>
- * 
  * <p><b>Usage Example (ON_DEMAND mode):</b>
  * <pre>
  * {@code
@@ -46,8 +44,6 @@ import java.util.concurrent.TimeUnit;
  * sdk.shutdown();
  * }
  * </pre>
- * </p>
- * 
  * <p><b>Usage Example (POLLING mode):</b>
  * <pre>
  * {@code
@@ -66,7 +62,6 @@ import java.util.concurrent.TimeUnit;
  * sdk.shutdown();
  * }
  * </pre>
- * </p>
  * 
  * <p><b>Resource Management:</b>
  * For POLLING mode, always call {@link #shutdown()} to stop background threads
@@ -185,7 +180,7 @@ public class WeatherSDK {
 
         /**
          * Sets the maximum size for stored data
-         * @param maxSize the number of DTO instanse remember too (default: 10)
+         * @param size the number of DTO instanse remember too (default: 10)
          * @return the current Builder instance for method chaining
          */
         public Builder maxSize(Integer size) {
@@ -230,7 +225,7 @@ public class WeatherSDK {
      * Gets current weather data for specified city
      * @param cityName the name of the city
      * @return weather data in JSON format
-     * @throws WeatherSDKException if request fails or city not found
+     * @throws IllegalArgumentException if request fails or city not found
      */
     public WeatherResponse getWeatherObj(String cityName) {
         if (cityName == null || cityName.isBlank()) {

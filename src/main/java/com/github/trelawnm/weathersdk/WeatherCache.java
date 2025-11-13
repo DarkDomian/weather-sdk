@@ -17,7 +17,6 @@ import java.util.Set;
  * evicting the least recently used entries when capacity is reached. Each cached
  * entry has a time-to-live (TTL) after which it is considered stale and requires
  * refresh from the API.
- * </p>
  * 
  * <p><b>Features:</b>
  * <ul>
@@ -26,8 +25,6 @@ import java.util.Set;
  *   <li>O(1) time complexity for get and put operations</li>
  *   <li>Thread-safe for concurrent access</li>
  * </ul>
- * </p>
- *
  * <p><b>Usage Example:</b>
  * <pre>
  * {@code
