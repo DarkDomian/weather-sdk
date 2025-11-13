@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.github.trelawnm.weathersdk"},{"l":"com.github.trelawnm.weathersdk.model"}];updateSearchResults();
