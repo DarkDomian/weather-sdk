@@ -1,33 +1,57 @@
 # Weather SDK
 
-##  Setup for Development
+[![Release](https://img.shields.io/badge/release-v1.1.0-blue.svg)](https://github.com/trelawnm/weather-sdk/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Java](https://img.shields.io/badge/java-8%2B-orange.svg)](https://java.com)
 
-### 1. Get Your API Key
-- Register at [OpenWeatherMap](https://openweathermap.org/api)
-- Get your free API key
+A lightweight Java SDK for seamless integration with the OpenWeatherMap API. Built for efficiency and ease of use.
 
-### 2. Local Setup
-```bash
-# Copy the example file
-cp .env.example .env
+![weather badge image](misc/badge.jpg)
 
-# Edit .env and add your API key
-echo "OPENWEATHER_API_KEY=your_actual_key_here" > .env
+## Quick Start
+
+### Installation
+```xml
+<dependency>
+    <groupId>com.github.trelawnm.weathersdk</groupId>
+    <artifactId>weather-sdk</artifactId>
+    <version>1.1.0</version>
+</dependency>
 ```
 
-### 3. Run Tests
-```bash
-# Run all tests
-mvn test
+### Basic Usage
+```java
+// Initialize SDK
+WeatherSDK sdk = new WeatherSDK.Builder("your-api-key")
+     .mode(WeatherSDKMode.POLLING)
+     .build();
 
-# Run only integration tests
-mvn test -Dtest=WeatherSDKIntegrationTest
+// Get weather data
+String weatherJson = sdk.getWeather("London");
+WeatherResponse weather = sdk.getWeatherObj("Paris");
+
+// Cleanup
+sdk.shutdown();
+sdk.clearCache();
 ```
 
-## Environment Variables
+## Key Features
 
-### Required
-- `OPENWEATHER_API_KEY` - Your OpenWeatherMap API key
+- **Smart Caching** - Reduces API calls with configurable TTL
+- **Dual Operation Modes** - On-demand or background polling
+- **Free Tier Friendly** - Optimized for OpenWeatherMap's free plan
+- **Thread-Safe** - Built for concurrent applications
 
-### Optional
-- `OPENWEATHER_ENDPOINT` - Custom API endpoint (default: OpenWeatherMap)
+## Documentation
+
+- [Release Notes](https://github.com/trelawnm/weather-sdk/releases)
+- [Full Documentation](https://github.com/trelawnm/weather-sdk)
+- [OpenWeatherMap API](https://openweathermap.org/api)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**Get your free API key at [OpenWeatherMap.org](https://openweathermap.org/api)** 🌤️
