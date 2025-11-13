@@ -28,9 +28,10 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       env:
-        OPENWEATHER_API_KEY: ${{ sicrets.OPENWEATHER_API_KEY }}
+        OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
